@@ -1,0 +1,16 @@
+# Local Stripe config with real keys — keep the example committed
+stripe-config.js
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Local demo / tunnel notes
+.demo-url.txt
+
+# Env / secrets
+.env
+.env.*
+!.env.example

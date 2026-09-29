@@ -16,6 +16,8 @@
       --accent-dark: #2944ae;
       --positive: #147a4b;
       --negative: #b5473c;
+      --pro: #7c3aed;
+      --pro-dark: #6d28d9;
       --shadow: 0 18px 50px rgba(30, 45, 75, .10);
     }
 
@@ -31,9 +33,17 @@
     button { cursor: pointer; }
     .shell { width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 46px 0 64px; }
     .hero { margin-bottom: 24px; }
+    .hero-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
     .eyebrow { color: var(--accent); font-size: .78rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
     h1 { margin: 5px 0 7px; font-size: clamp(2rem, 5vw, 3.1rem); letter-spacing: -.045em; line-height: 1.05; }
     .intro { margin: 0; max-width: 610px; color: var(--muted); }
+    .plan-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 999px; font-size: .78rem; font-weight: 800;
+      letter-spacing: .04em; text-transform: uppercase;
+    }
+    .plan-badge.free { background: #eef2ff; color: var(--accent); border: 1px solid #c7d2fe; }
+    .plan-badge.pro { background: #f5f3ff; color: var(--pro); border: 1px solid #ddd6fe; }
     .card {
       margin-bottom: 18px;
       padding: clamp(20px, 4vw, 32px);
@@ -42,7 +52,7 @@
       background: rgba(255, 255, 255, .9);
       box-shadow: var(--shadow);
     }
-    .section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
     h2 { margin: 0; font-size: 1.15rem; letter-spacing: -.02em; }
     .hint, .small { color: var(--muted); font-size: .88rem; }
     .field-label { display: block; margin-bottom: 7px; color: #344054; font-size: .9rem; font-weight: 700; }
@@ -57,11 +67,24 @@
       transition: border-color .15s, box-shadow .15s;
     }
     input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(54, 87, 214, .14); }
+    input:disabled { background: #f2f4f7; color: #98a2b3; cursor: not-allowed; }
     .rent-row { max-width: 360px; }
     .roommates { display: grid; gap: 10px; }
-    .roommate-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(125px, 180px) auto; gap: 10px; align-items: end; }
+    .roommate-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(100px, 140px) minmax(90px, 110px) auto;
+      gap: 10px;
+      align-items: end;
+    }
+    .roommate-row.equal-mode {
+      grid-template-columns: minmax(0, 1fr) minmax(125px, 180px) auto;
+    }
     .roommate-row .field-label { margin-bottom: 0; }
     .roommate-row .field-label input { margin-top: 7px; }
+    .pct-field { display: none; }
+    body.is-pro .pct-field { display: block; }
+    body.is-pro .roommate-row.equal-mode { grid-template-columns: minmax(0, 1.2fr) minmax(100px, 140px) minmax(90px, 110px) auto; }
+    body:not(.is-pro) .roommate-row { grid-template-columns: minmax(0, 1fr) minmax(125px, 180px) auto; }
     .remove {
       height: 45px;
       padding: 0 13px;
@@ -73,7 +96,7 @@
     }
     .remove:hover { background: #fff6f5; }
     .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 17px; }
-    .primary, .secondary {
+    .primary, .secondary, .pro-btn {
       min-height: 45px;
       padding: 0 17px;
       border-radius: 11px;
@@ -83,6 +106,8 @@
     .primary:hover { background: var(--accent-dark); }
     .secondary { border: 1px solid var(--line); background: #fff; color: var(--ink); }
     .secondary:hover { background: var(--soft); }
+    .pro-btn { border: 1px solid var(--pro); background: var(--pro); color: white; }
+    .pro-btn:hover { background: var(--pro-dark); }
     .summary {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -103,44 +128,152 @@
       border-radius: 14px;
       background: #fff;
     }
+    .result.pro-extra {
+      grid-template-columns: minmax(0, 1.1fr) repeat(2, minmax(90px, .7fr)) minmax(120px, 1fr);
+    }
     .person { min-width: 0; font-weight: 750; overflow-wrap: anywhere; }
     .result-label { display: block; color: var(--muted); font-size: .76rem; font-weight: 600; }
     .result-value { display: block; margin-top: 2px; font-weight: 700; }
     .net-positive { color: var(--positive); }
     .net-negative { color: var(--negative); }
+    .pay-links { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pay-links a {
+      display: inline-block; padding: 5px 10px; border-radius: 8px;
+      font-size: .75rem; font-weight: 700; text-decoration: none;
+      border: 1px solid var(--line); color: var(--ink); background: var(--soft);
+    }
+    .pay-links a:hover { border-color: var(--accent); color: var(--accent); }
     .empty { padding: 24px 5px 4px; color: var(--muted); text-align: center; }
     .share-note { min-height: 1.4em; margin: 10px 0 0; color: var(--positive); font-size: .9rem; }
+    .watermark {
+      margin-top: 18px; padding: 10px 14px; border-radius: 10px;
+      background: #fff7ed; border: 1px dashed #fdba74;
+      color: #9a3412; font-size: .82rem; text-align: center; font-weight: 600;
+    }
+    body.is-pro .watermark { display: none; }
     footer { margin-top: 24px; color: var(--muted); font-size: .82rem; text-align: center; }
+
+    /* Pro-locked panels */
+    .pro-panel { position: relative; margin-top: 22px; }
+    .pro-panel-inner { display: grid; gap: 12px; }
+    .pro-lock-overlay {
+      display: none;
+      position: absolute; inset: -8px; z-index: 2;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .55);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 10px;
+      text-align: center; padding: 20px;
+    }
+    body:not(.is-pro) .pro-panel .pro-lock-overlay { display: flex; }
+    body:not(.is-pro) .pro-panel .pro-panel-inner {
+      filter: blur(2.5px); pointer-events: none; user-select: none; opacity: .55;
+    }
+    .lock-label { font-weight: 800; color: var(--pro); font-size: .95rem; }
+    .lock-sub { margin: 0; color: var(--muted); font-size: .85rem; max-width: 280px; }
+    .pro-tag {
+      display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px;
+      background: #f5f3ff; color: var(--pro); font-size: .68rem; font-weight: 800;
+      letter-spacing: .04em; vertical-align: middle;
+    }
+    .mode-toggle { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .mode-toggle label { display: flex; align-items: center; gap: 6px; font-size: .88rem; font-weight: 600; color: #344054; }
+    .pct-total-warn { color: var(--negative); font-size: .85rem; font-weight: 700; display: none; }
+    .pct-total-warn.show { display: block; }
+    .who-owes { display: grid; gap: 8px; margin-top: 8px; }
+    .who-owes-row {
+      padding: 12px 14px; border-radius: 12px; background: var(--soft);
+      border: 1px solid var(--line); font-size: .92rem;
+    }
+    .who-owes-row strong { font-weight: 750; }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(15, 23, 42, .45); align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      width: min(420px, 100%); background: #fff; border-radius: 20px;
+      padding: 28px 24px; box-shadow: 0 24px 60px rgba(0,0,0,.2);
+      position: relative;
+    }
+    .modal h2 { font-size: 1.35rem; margin-bottom: 6px; }
+    .modal .price { font-size: 2rem; font-weight: 800; letter-spacing: -.03em; margin: 12px 0 4px; }
+    .modal .price span { font-size: 1rem; font-weight: 600; color: var(--muted); }
+    .modal ul { margin: 14px 0 20px; padding-left: 1.2em; color: #344054; font-size: .92rem; }
+    .modal ul li { margin-bottom: 6px; }
+    .modal-close {
+      position: absolute; top: 12px; right: 14px; border: none; background: transparent;
+      font-size: 1.4rem; color: var(--muted); line-height: 1; padding: 4px 8px;
+    }
+    .modal-close:hover { color: var(--ink); }
+    .modal-actions { display: flex; flex-direction: column; gap: 8px; }
+    .modal-note { margin: 10px 0 0; font-size: .78rem; color: var(--muted); text-align: center; }
+
     @media (max-width: 650px) {
       .shell { width: min(100% - 22px, 920px); padding-top: 28px; }
       .card { border-radius: 17px; padding: 20px 16px; }
-      .roommate-row { grid-template-columns: minmax(0, 1fr) auto; }
-      .roommate-row .paid-field { grid-column: 1; }
-      .roommate-row .remove { grid-column: 2; grid-row: 1 / span 2; }
+      .roommate-row,
+      body.is-pro .roommate-row.equal-mode,
+      body:not(.is-pro) .roommate-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+      .roommate-row .paid-field,
+      .roommate-row .pct-field { grid-column: 1; }
+      .roommate-row .remove { grid-column: 2; grid-row: 1 / span 3; }
       .summary { grid-template-columns: 1fr; gap: 8px; }
       .summary-box { display: flex; justify-content: space-between; align-items: center; }
       .summary-box .small { margin: 0; }
-      .result { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .result, .result.pro-extra { grid-template-columns: 1fr 1fr; gap: 9px; }
       .person { grid-column: 1 / -1; padding-bottom: 2px; }
+      .pay-links { grid-column: 1 / -1; }
     }
   </style>
 </head>
 <body>
   <main class="shell">
     <header class="hero">
-      <div class="eyebrow">Simple, shareable math</div>
-      <h1>Rent Split Link</h1>
-      <p class="intro">Split monthly rent equally, account for what has already been paid, and share the numbers with one link.</p>
+      <div class="hero-top">
+        <div>
+          <div class="eyebrow">Simple, shareable math</div>
+          <h1>Rent Split Link</h1>
+          <p class="intro">Split monthly rent, account for what has already been paid, and share the numbers with one link. Free = equal shares. Pro unlocks custom %, pay links, household save, and export.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <span id="plan-badge" class="plan-badge free">Free</span>
+          <button id="upgrade-open" class="pro-btn" type="button" style="min-height:38px;padding:0 14px;font-size:.88rem;">Upgrade to Pro</button>
+        </div>
+      </div>
     </header>
 
     <section class="card" aria-labelledby="setup-title">
       <div class="section-heading">
         <h2 id="setup-title">Set up the split</h2>
-        <span class="hint">Equal shares</span>
+        <span id="share-mode-hint" class="hint">Equal shares</span>
       </div>
       <div class="rent-row">
         <label class="field-label" for="rent">Monthly rent total</label>
         <input id="rent" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 2400">
+      </div>
+
+      <div class="pro-panel" id="custom-pct-panel" style="margin-top:18px;">
+        <div class="pro-panel-inner">
+          <div class="mode-toggle">
+            <span class="field-label" style="margin:0;">Share mode <span class="pro-tag">Pro</span></span>
+            <label><input type="radio" name="share-mode" value="equal" checked> Equal</label>
+            <label><input type="radio" name="share-mode" value="custom"> Custom %</label>
+            <span id="pct-total-warn" class="pct-total-warn">Percentages should add up to 100%.</span>
+          </div>
+        </div>
+        <div class="pro-lock-overlay" aria-hidden="true">
+          <div class="lock-label">🔒 Custom % per roommate</div>
+          <p class="lock-sub">Pro lets you set unequal shares (e.g. 40/30/30).</p>
+          <button class="pro-btn upgrade-cta" type="button">Upgrade — $5/mo</button>
+        </div>
       </div>
 
       <div class="section-heading" style="margin-top: 27px;">
@@ -153,6 +286,41 @@
         <button id="copy-link" class="primary" type="button">Copy share link</button>
       </div>
       <p id="share-note" class="share-note" role="status" aria-live="polite"></p>
+
+      <div class="pro-panel" id="household-panel">
+        <div class="pro-panel-inner">
+          <div class="section-heading" style="margin-bottom:8px;">
+            <h2>Named household <span class="pro-tag">Pro</span></h2>
+          </div>
+          <label class="field-label" for="household-name">Household name</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <input id="household-name" type="text" maxlength="80" placeholder="e.g. Oak St apt" style="flex:1;min-width:160px;">
+            <button id="save-household" class="secondary" type="button">Save locally</button>
+            <button id="load-household" class="secondary" type="button">Load</button>
+          </div>
+          <p class="small" style="margin:6px 0 0;">Saved in this browser only (localStorage).</p>
+        </div>
+        <div class="pro-lock-overlay">
+          <div class="lock-label">🔒 Named household save</div>
+          <p class="lock-sub">Save &amp; reload your household setup on this device.</p>
+          <button class="pro-btn upgrade-cta" type="button">Upgrade — $5/mo</button>
+        </div>
+      </div>
+
+      <div class="pro-panel" id="paylinks-panel">
+        <div class="pro-panel-inner">
+          <div class="section-heading" style="margin-bottom:8px;">
+            <h2>Pay links <span class="pro-tag">Pro</span></h2>
+            <span class="hint">Venmo / Cash App handles per person</span>
+          </div>
+          <div id="paylink-fields" class="roommates"></div>
+        </div>
+        <div class="pro-lock-overlay">
+          <div class="lock-label">🔒 Venmo &amp; Cash App pay links</div>
+          <p class="lock-sub">Add handles so each roommate gets a one-tap pay link for what they owe.</p>
+          <button class="pro-btn upgrade-cta" type="button">Upgrade — $5/mo</button>
+        </div>
+      </div>
     </section>
 
     <section class="card" aria-labelledby="results-title">
@@ -161,19 +329,65 @@
         <span class="hint">Updates as you type</span>
       </div>
       <div class="summary">
-        <div class="summary-box"><span class="small">Each share</span><span id="share-total" class="summary-value">$0.00</span></div>
+        <div class="summary-box"><span class="small" id="share-label">Each share</span><span id="share-total" class="summary-value">$0.00</span></div>
         <div class="summary-box"><span class="small">Total already paid</span><span id="paid-total" class="summary-value">$0.00</span></div>
         <div class="summary-box"><span class="small">Unallocated balance</span><span id="balance-total" class="summary-value">$0.00</span></div>
       </div>
       <div id="results" class="result-list"></div>
+
+      <div class="pro-panel" id="export-panel">
+        <div class="pro-panel-inner">
+          <div class="section-heading" style="margin-bottom:8px;">
+            <h2>Who owes whom <span class="pro-tag">Pro</span></h2>
+          </div>
+          <div id="who-owes" class="who-owes"></div>
+          <div class="actions" style="margin-top:12px;">
+            <button id="export-pdf" class="secondary" type="button">Export / print PDF</button>
+            <button id="export-text" class="secondary" type="button">Copy settlement text</button>
+          </div>
+        </div>
+        <div class="pro-lock-overlay">
+          <div class="lock-label">🔒 PDF / export settlements</div>
+          <p class="lock-sub">See who owes whom and export a clean print-ready summary.</p>
+          <button class="pro-btn upgrade-cta" type="button">Upgrade — $5/mo</button>
+        </div>
+      </div>
+
+      <div class="watermark" id="free-watermark">Made with Rent Split Link (Free) — Upgrade to Pro to remove this watermark.</div>
     </section>
 
-    <footer>Everything stays in this link — no account or backend required.</footer>
+    <footer>Everything stays in this link — no account or backend required for the free tier. Pro checkout uses Stripe (draft).</footer>
   </main>
 
+  <!-- Upgrade modal -->
+  <div id="upgrade-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
+    <div class="modal">
+      <button type="button" class="modal-close" id="upgrade-close" aria-label="Close">&times;</button>
+      <h2 id="upgrade-title">Rent Split Link Pro</h2>
+      <p class="small">Unlock custom splits, pay links, household save, and export.</p>
+      <div class="price">$5 <span>/ month</span></div>
+      <ul>
+        <li>Custom % per roommate</li>
+        <li>Venmo &amp; Cash App pay links</li>
+        <li>Named household save (local)</li>
+        <li>PDF / export “who owes whom”</li>
+        <li>No free watermark</li>
+      </ul>
+      <div class="modal-actions">
+        <button id="stripe-checkout" class="pro-btn" type="button">Upgrade with Stripe</button>
+        <button id="upgrade-cancel" class="secondary" type="button">Not now</button>
+      </div>
+      <p class="modal-note">Draft: uses placeholder Stripe checkout URL from <code>stripe-config.js</code>. After success, return with <code>?pro=1</code>.</p>
+    </div>
+  </div>
+
+  <script src="stripe-config.js"></script>
   <script>
     (() => {
       'use strict';
+      const PRO_KEY = 'rsl_pro';
+      const HOUSEHOLD_KEY = 'rsl_household';
+
       const rentInput = document.querySelector('#rent');
       const roommatesEl = document.querySelector('#roommates');
       const resultsEl = document.querySelector('#results');
@@ -181,8 +395,61 @@
       const paidTotalEl = document.querySelector('#paid-total');
       const balanceTotalEl = document.querySelector('#balance-total');
       const shareNoteEl = document.querySelector('#share-note');
+      const shareModeHint = document.querySelector('#share-mode-hint');
+      const shareLabel = document.querySelector('#share-label');
+      const planBadge = document.querySelector('#plan-badge');
+      const upgradeOpen = document.querySelector('#upgrade-open');
+      const upgradeModal = document.querySelector('#upgrade-modal');
+      const paylinkFields = document.querySelector('#paylink-fields');
+      const whoOwesEl = document.querySelector('#who-owes');
+      const householdNameInput = document.querySelector('#household-name');
+      const pctWarn = document.querySelector('#pct-total-warn');
       const currency = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
+
       let people = [];
+      let shareMode = 'equal'; // 'equal' | 'custom'
+
+      function isPro() {
+        return localStorage.getItem(PRO_KEY) === 'true';
+      }
+
+      function setPro(on) {
+        if (on) localStorage.setItem(PRO_KEY, 'true');
+        else localStorage.removeItem(PRO_KEY);
+        applyProUi();
+      }
+
+      function applyProUi() {
+        const pro = isPro();
+        document.body.classList.toggle('is-pro', pro);
+        planBadge.textContent = pro ? 'Pro' : 'Free';
+        planBadge.className = 'plan-badge ' + (pro ? 'pro' : 'free');
+        upgradeOpen.style.display = pro ? 'none' : '';
+        shareModeHint.textContent = pro && shareMode === 'custom' ? 'Custom %' : 'Equal shares';
+        if (!pro) {
+          shareMode = 'equal';
+          document.querySelectorAll('input[name="share-mode"]').forEach(r => {
+            r.checked = r.value === 'equal';
+          });
+        }
+        renderInputs();
+        renderPaylinkFields();
+        renderResults();
+      }
+
+      // Honor ?pro=1 (Stripe success redirect) and ?pro=0 (dev reset)
+      const params = new URLSearchParams(location.search);
+      if (params.get('pro') === '1') {
+        localStorage.setItem(PRO_KEY, 'true');
+        params.delete('pro');
+        const clean = location.pathname + (params.toString() ? '?' + params.toString() : '') + location.hash;
+        history.replaceState(null, '', clean);
+      } else if (params.get('pro') === '0') {
+        localStorage.removeItem(PRO_KEY);
+        params.delete('pro');
+        const clean = location.pathname + (params.toString() ? '?' + params.toString() : '') + location.hash;
+        history.replaceState(null, '', clean);
+      }
 
       const money = value => currency.format(Number.isFinite(value) ? value : 0);
       const numberValue = value => {
@@ -190,15 +457,42 @@
         return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
       };
 
-      function makePerson(name = '', paid = '') {
-        return { name, paid: paid === '' ? '' : String(paid) };
+      function makePerson(name = '', paid = '', pct = '', venmo = '', cashapp = '') {
+        return {
+          name,
+          paid: paid === '' ? '' : String(paid),
+          pct: pct === '' || pct == null ? '' : String(pct),
+          venmo: venmo || '',
+          cashapp: cashapp || ''
+        };
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>'"]/g, character => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[character]));
+      }
+
+      function getShares(rent) {
+        const n = people.length;
+        if (!n) return [];
+        if (!isPro() || shareMode !== 'custom') {
+          const equal = rent / n;
+          return people.map(() => equal);
+        }
+        const pcts = people.map(p => numberValue(p.pct));
+        const sum = pcts.reduce((a, b) => a + b, 0);
+        if (sum <= 0) return people.map(() => rent / n);
+        return pcts.map(p => rent * (p / 100));
       }
 
       function renderInputs() {
+        const pro = isPro();
+        const useCustom = pro && shareMode === 'custom';
         roommatesEl.innerHTML = '';
         people.forEach((person, index) => {
           const row = document.createElement('div');
-          row.className = 'roommate-row';
+          row.className = 'roommate-row' + (useCustom ? '' : ' equal-mode');
           row.innerHTML = `
             <label class="field-label">Name
               <input class="name-input" type="text" maxlength="80" autocomplete="off" placeholder="Roommate ${index + 1}" value="">
@@ -206,54 +500,153 @@
             <label class="field-label paid-field">Already paid
               <input class="paid-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="$0" value="">
             </label>
+            <label class="field-label pct-field">Share %
+              <input class="pct-input" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" value="">
+            </label>
             <button class="remove" type="button" aria-label="Remove roommate">Remove</button>`;
           const nameInput = row.querySelector('.name-input');
           const paidInput = row.querySelector('.paid-input');
+          const pctInput = row.querySelector('.pct-input');
           nameInput.value = person.name;
           paidInput.value = person.paid;
-          nameInput.addEventListener('input', event => { people[index].name = event.target.value; renderResults(); });
+          pctInput.value = person.pct;
+          nameInput.addEventListener('input', event => {
+            people[index].name = event.target.value;
+            renderPaylinkFields();
+            renderResults();
+          });
           paidInput.addEventListener('input', event => { people[index].paid = event.target.value; renderResults(); });
+          pctInput.addEventListener('input', event => { people[index].pct = event.target.value; renderResults(); });
           row.querySelector('.remove').addEventListener('click', () => {
             people.splice(index, 1);
             if (!people.length) people.push(makePerson());
             renderInputs();
+            renderPaylinkFields();
             renderResults();
           });
           roommatesEl.appendChild(row);
         });
       }
 
+      function renderPaylinkFields() {
+        paylinkFields.innerHTML = '';
+        people.forEach((person, index) => {
+          const label = person.name.trim() || `Roommate ${index + 1}`;
+          const row = document.createElement('div');
+          row.style.display = 'grid';
+          row.style.gridTemplateColumns = 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)';
+          row.style.gap = '10px';
+          row.style.alignItems = 'end';
+          row.innerHTML = `
+            <div class="small" style="font-weight:700;color:var(--ink);padding-bottom:10px;">${escapeHtml(label)}</div>
+            <label class="field-label">Venmo @
+              <input class="venmo-input" type="text" maxlength="40" placeholder="username" value="">
+            </label>
+            <label class="field-label">Cash App $
+              <input class="cashapp-input" type="text" maxlength="40" placeholder="cashtag" value="">
+            </label>`;
+          const venmo = row.querySelector('.venmo-input');
+          const cashapp = row.querySelector('.cashapp-input');
+          venmo.value = person.venmo || '';
+          cashapp.value = person.cashapp || '';
+          venmo.addEventListener('input', e => { people[index].venmo = e.target.value.replace(/^@/, ''); renderResults(); });
+          cashapp.addEventListener('input', e => { people[index].cashapp = e.target.value.replace(/^\$/, ''); renderResults(); });
+          paylinkFields.appendChild(row);
+        });
+      }
+
+      function settlePairs(balances) {
+        // balances: [{name, net}] where net > 0 means overpaid (should receive), net < 0 owes
+        const creditors = [];
+        const debtors = [];
+        balances.forEach(b => {
+          if (b.net > 0.005) creditors.push({ name: b.name, amt: b.net });
+          else if (b.net < -0.005) debtors.push({ name: b.name, amt: -b.net });
+        });
+        const transfers = [];
+        let i = 0, j = 0;
+        while (i < debtors.length && j < creditors.length) {
+          const pay = Math.min(debtors[i].amt, creditors[j].amt);
+          transfers.push({ from: debtors[i].name, to: creditors[j].name, amount: pay });
+          debtors[i].amt -= pay;
+          creditors[j].amt -= pay;
+          if (debtors[i].amt < 0.005) i++;
+          if (creditors[j].amt < 0.005) j++;
+        }
+        return transfers;
+      }
+
       function renderResults() {
         const rent = numberValue(rentInput.value);
-        const share = people.length ? rent / people.length : 0;
+        const shares = getShares(rent);
         const paidTotal = people.reduce((sum, person) => sum + numberValue(person.paid), 0);
         const balance = rent - paidTotal;
-        shareTotalEl.textContent = money(share);
+        const equalShare = people.length ? rent / people.length : 0;
+        const useCustom = isPro() && shareMode === 'custom';
+
+        if (useCustom) {
+          const pctSum = people.reduce((s, p) => s + numberValue(p.pct), 0);
+          pctWarn.classList.toggle('show', people.length > 0 && Math.abs(pctSum - 100) > 0.05);
+          shareLabel.textContent = 'Custom shares';
+          shareTotalEl.textContent = money(rent);
+        } else {
+          pctWarn.classList.remove('show');
+          shareLabel.textContent = 'Each share';
+          shareTotalEl.textContent = money(equalShare);
+        }
+        shareModeHint.textContent = useCustom ? 'Custom %' : 'Equal shares';
         paidTotalEl.textContent = money(paidTotal);
         balanceTotalEl.textContent = money(balance);
         resultsEl.innerHTML = '';
 
         if (!people.length) {
           resultsEl.innerHTML = '<div class="empty">Add at least one roommate to see the split.</div>';
+          whoOwesEl.innerHTML = '';
           return;
         }
+
+        const nets = [];
         people.forEach((person, index) => {
           const paid = numberValue(person.paid);
+          const share = shares[index] || 0;
           const net = paid - share;
+          nets.push({ name: person.name.trim() || `Roommate ${index + 1}`, net, share, paid, person });
           const result = document.createElement('div');
-          result.className = 'result';
+          result.className = 'result' + (isPro() ? ' pro-extra' : '');
           const displayName = person.name.trim() || `Roommate ${index + 1}`;
           const netText = Math.abs(net) < 0.005 ? 'Settled' : net > 0 ? `${money(net)} owed to them` : `${money(-net)} still owed`;
+          let payHtml = '';
+          if (isPro()) {
+            const stillOwes = net < -0.005 ? -net : 0;
+            const links = [];
+            if (person.venmo && stillOwes > 0) {
+              const amt = stillOwes.toFixed(2);
+              links.push(`<a href="https://venmo.com/${encodeURIComponent(person.venmo)}?txn=pay&amount=${amt}" target="_blank" rel="noopener">Venmo $${amt}</a>`);
+            }
+            if (person.cashapp && stillOwes > 0) {
+              const amt = stillOwes.toFixed(2);
+              const tag = person.cashapp.replace(/^\$/, '');
+              links.push(`<a href="https://cash.app/$${encodeURIComponent(tag)}/${amt}" target="_blank" rel="noopener">Cash App $${amt}</a>`);
+            }
+            payHtml = `<div class="pay-links">${links.length ? links.join('') : '<span class="small">—</span>'}</div>`;
+          }
           result.innerHTML = `
-            <div class="person">${escapeHtml(displayName)}</div>
+            <div class="person">${escapeHtml(displayName)}${useCustom ? ` <span class="small">(${numberValue(person.pct) || '—'}%)</span>` : ''}</div>
             <div><span class="result-label">Share</span><span class="result-value">${money(share)}</span></div>
-            <div><span class="result-label">Status</span><span class="result-value ${net > 0.005 ? 'net-positive' : net < -0.005 ? 'net-negative' : ''}">${netText}</span></div>`;
+            <div><span class="result-label">Status</span><span class="result-value ${net > 0.005 ? 'net-positive' : net < -0.005 ? 'net-negative' : ''}">${netText}</span></div>
+            ${payHtml}`;
           resultsEl.appendChild(result);
         });
-      }
 
-      function escapeHtml(value) {
-        return value.replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+        // Who owes whom
+        const transfers = settlePairs(nets.map(n => ({ name: n.name, net: n.net })));
+        if (!transfers.length) {
+          whoOwesEl.innerHTML = '<div class="who-owes-row">Everyone is settled — nothing to transfer.</div>';
+        } else {
+          whoOwesEl.innerHTML = transfers.map(t =>
+            `<div class="who-owes-row"><strong>${escapeHtml(t.from)}</strong> owes <strong>${escapeHtml(t.to)}</strong> ${money(t.amount)}</div>`
+          ).join('');
+        }
       }
 
       function stateFromPage() {
@@ -264,7 +657,18 @@
           const state = JSON.parse(decodeURIComponent(escape(window.atob(padded))));
           if (!state || !Array.isArray(state.people)) return false;
           rentInput.value = state.rent == null ? '' : state.rent;
-          people = state.people.map(person => makePerson(String(person.name || ''), person.paid == null ? '' : person.paid));
+          shareMode = state.mode === 'custom' ? 'custom' : 'equal';
+          document.querySelectorAll('input[name="share-mode"]').forEach(r => {
+            r.checked = r.value === shareMode;
+          });
+          householdNameInput.value = state.household || '';
+          people = state.people.map(person => makePerson(
+            String(person.name || ''),
+            person.paid == null ? '' : person.paid,
+            person.pct == null ? '' : person.pct,
+            person.venmo || '',
+            person.cashapp || ''
+          ));
           if (!people.length) people.push(makePerson());
           return true;
         } catch (error) {
@@ -273,14 +677,25 @@
       }
 
       function stateHash() {
-        const state = { rent: rentInput.value, people: people.map(person => ({ name: person.name, paid: person.paid })) };
+        const state = {
+          rent: rentInput.value,
+          mode: shareMode,
+          household: householdNameInput.value,
+          people: people.map(person => ({
+            name: person.name,
+            paid: person.paid,
+            pct: person.pct,
+            venmo: person.venmo,
+            cashapp: person.cashapp
+          }))
+        };
         const bytes = unescape(encodeURIComponent(JSON.stringify(state)));
         const encoded = window.btoa(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
         return `#s=${encoded}`;
       }
 
       async function copyShareLink() {
-        const url = `${location.href.split('#')[0]}${stateHash()}`;
+        const url = `${location.href.split('#')[0].split('?')[0]}${location.search}${stateHash()}`;
         try {
           await navigator.clipboard.writeText(url);
           shareNoteEl.textContent = 'Share link copied to your clipboard.';
@@ -295,20 +710,128 @@
         }
       }
 
+      function openModal() {
+        upgradeModal.classList.add('open');
+      }
+      function closeModal() {
+        upgradeModal.classList.remove('open');
+      }
+
+      function stripeCheckout() {
+        const cfg = window.RSL_STRIPE || {};
+        const url = cfg.checkoutUrl || '';
+        if (!url || url.includes('PLACEHOLDER')) {
+          alert(
+            'Stripe checkout URL is still a placeholder.\n\n' +
+            '1. Copy stripe-config.example.js → stripe-config.js\n' +
+            '2. Create a Payment Link or Checkout Session (see docs/STRIPE_SETUP.md)\n' +
+            '3. Set checkoutUrl (and success URL with ?pro=1)\n\n' +
+            'Dev shortcut: append ?pro=1 to this page to unlock Pro locally.'
+          );
+          return;
+        }
+        window.location.href = url;
+      }
+
+      // Household save/load
+      document.querySelector('#save-household').addEventListener('click', () => {
+        if (!isPro()) { openModal(); return; }
+        const payload = {
+          name: householdNameInput.value.trim() || 'Household',
+          rent: rentInput.value,
+          mode: shareMode,
+          people
+        };
+        localStorage.setItem(HOUSEHOLD_KEY, JSON.stringify(payload));
+        shareNoteEl.textContent = `Saved “${payload.name}” locally.`;
+      });
+      document.querySelector('#load-household').addEventListener('click', () => {
+        if (!isPro()) { openModal(); return; }
+        try {
+          const raw = localStorage.getItem(HOUSEHOLD_KEY);
+          if (!raw) { shareNoteEl.textContent = 'No saved household found.'; return; }
+          const data = JSON.parse(raw);
+          householdNameInput.value = data.name || '';
+          rentInput.value = data.rent == null ? '' : data.rent;
+          shareMode = data.mode === 'custom' ? 'custom' : 'equal';
+          document.querySelectorAll('input[name="share-mode"]').forEach(r => {
+            r.checked = r.value === shareMode;
+          });
+          people = (data.people || []).map(p => makePerson(p.name, p.paid, p.pct, p.venmo, p.cashapp));
+          if (!people.length) people.push(makePerson());
+          renderInputs();
+          renderPaylinkFields();
+          renderResults();
+          shareNoteEl.textContent = `Loaded “${data.name || 'Household'}”.`;
+        } catch (e) {
+          shareNoteEl.textContent = 'Could not load saved household.';
+        }
+      });
+
+      // Export
+      document.querySelector('#export-pdf').addEventListener('click', () => {
+        if (!isPro()) { openModal(); return; }
+        window.print();
+      });
+      document.querySelector('#export-text').addEventListener('click', async () => {
+        if (!isPro()) { openModal(); return; }
+        const rent = numberValue(rentInput.value);
+        const shares = getShares(rent);
+        const nets = people.map((person, index) => ({
+          name: person.name.trim() || `Roommate ${index + 1}`,
+          net: numberValue(person.paid) - (shares[index] || 0)
+        }));
+        const transfers = settlePairs(nets);
+        const household = householdNameInput.value.trim();
+        let text = `Rent Split Link — Who owes whom\n`;
+        if (household) text += `Household: ${household}\n`;
+        text += `Rent: ${money(rent)}\n\n`;
+        if (!transfers.length) text += 'Everyone is settled.\n';
+        else transfers.forEach(t => { text += `${t.from} owes ${t.to} ${money(t.amount)}\n`; });
+        try {
+          await navigator.clipboard.writeText(text);
+          shareNoteEl.textContent = 'Settlement text copied.';
+        } catch (e) {
+          shareNoteEl.textContent = 'Could not copy — select and copy from the Who owes whom list.';
+        }
+      });
+
       document.querySelector('#add-person').addEventListener('click', () => {
         people.push(makePerson());
-        renderInputs(); renderResults();
+        renderInputs();
+        renderPaylinkFields();
+        renderResults();
         roommatesEl.lastElementChild.querySelector('.name-input').focus();
       });
       document.querySelector('#copy-link').addEventListener('click', copyShareLink);
       rentInput.addEventListener('input', renderResults);
-      window.addEventListener('hashchange', () => { if (stateFromPage()) { renderInputs(); renderResults(); } });
+      window.addEventListener('hashchange', () => {
+        if (stateFromPage()) {
+          applyProUi();
+        }
+      });
+
+      document.querySelectorAll('input[name="share-mode"]').forEach(radio => {
+        radio.addEventListener('change', e => {
+          if (!isPro()) { openModal(); e.target.checked = false; document.querySelector('input[name="share-mode"][value="equal"]').checked = true; return; }
+          shareMode = e.target.value;
+          renderInputs();
+          renderResults();
+        });
+      });
+
+      upgradeOpen.addEventListener('click', openModal);
+      document.querySelector('#upgrade-close').addEventListener('click', closeModal);
+      document.querySelector('#upgrade-cancel').addEventListener('click', closeModal);
+      document.querySelector('#stripe-checkout').addEventListener('click', stripeCheckout);
+      upgradeModal.addEventListener('click', e => { if (e.target === upgradeModal) closeModal(); });
+      document.querySelectorAll('.upgrade-cta').forEach(btn => btn.addEventListener('click', openModal));
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
       if (!stateFromPage()) {
         people = [makePerson(), makePerson()];
       }
-      renderInputs();
-      renderResults();
+      applyProUi();
     })();
   </script>
 </body>
