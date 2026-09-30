@@ -97,7 +97,7 @@
     }
     .remove:hover { background: #fff6f5; }
     .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 17px; }
-    .primary, .secondary, .pro-btn {
+    .primary, .secondary {
       min-height: 45px;
       padding: 0 17px;
       border-radius: 11px;
@@ -107,8 +107,6 @@
     .primary:hover { background: var(--accent-dark); }
     .secondary { border: 1px solid var(--line); background: #fff; color: var(--ink); }
     .secondary:hover { background: var(--soft); }
-    .pro-btn { border: 1px solid var(--pro); background: var(--pro); color: white; }
-    .pro-btn:hover { background: var(--pro-dark); }
     .summary {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -129,9 +127,6 @@
       border-radius: 14px;
       background: #fff;
     }
-    .result.pro-extra {
-      grid-template-columns: minmax(0, 1.1fr) repeat(2, minmax(90px, .7fr)) minmax(120px, 1fr);
-    }
     .person { min-width: 0; font-weight: 750; overflow-wrap: anywhere; }
     .result-label { display: block; color: var(--muted); font-size: .76rem; font-weight: 600; }
     .result-value { display: block; margin-top: 2px; font-weight: 700; }
@@ -146,34 +141,12 @@
     .pay-links a:hover { border-color: var(--accent); color: var(--accent); }
     .empty { padding: 24px 5px 4px; color: var(--muted); text-align: center; }
     .share-note { min-height: 1.4em; margin: 10px 0 0; color: var(--positive); font-size: .9rem; }
-    .watermark {
-      margin-top: 18px; padding: 10px 14px; border-radius: 10px;
-      background: #fff7ed; border: 1px dashed #fdba74;
-      color: #9a3412; font-size: .82rem; text-align: center; font-weight: 600;
-    }
-    body.is-pro .watermark { display: none; }
     footer { margin-top: 24px; color: var(--muted); font-size: .82rem; text-align: center; }
 
-    /* Pro-locked panels */
-    .pro-panel { position: relative; margin-top: 22px; }
+    /* Pro recovery panels stay out of the default free experience. */
+    .pro-panel { display: none; margin-top: 22px; }
+    body.is-pro .pro-panel { display: block; }
     .pro-panel-inner { display: grid; gap: 12px; }
-    .pro-lock-overlay {
-      display: none;
-      position: absolute; inset: -8px; z-index: 2;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, .55);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
-      align-items: center; justify-content: center;
-      flex-direction: column; gap: 10px;
-      text-align: center; padding: 20px;
-    }
-    body:not(.is-pro) .pro-panel .pro-lock-overlay { display: flex; }
-    body:not(.is-pro) .pro-panel .pro-panel-inner {
-      filter: blur(2.5px); pointer-events: none; user-select: none; opacity: .55;
-    }
-    .lock-label { font-weight: 800; color: var(--pro); font-size: .95rem; }
-    .lock-sub { margin: 0; color: var(--muted); font-size: .85rem; max-width: 280px; }
     .pro-tag {
       display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px;
       background: #f5f3ff; color: var(--pro); font-size: .68rem; font-weight: 800;
@@ -214,31 +187,6 @@
     }
     .who-owes-row strong { font-weight: 750; }
 
-    /* Modal */
-    .modal-backdrop {
-      display: none; position: fixed; inset: 0; z-index: 100;
-      background: rgba(15, 23, 42, .45); align-items: center; justify-content: center;
-      padding: 20px;
-    }
-    .modal-backdrop.open { display: flex; }
-    .modal {
-      width: min(420px, 100%); background: #fff; border-radius: 20px;
-      padding: 28px 24px; box-shadow: 0 24px 60px rgba(0,0,0,.2);
-      position: relative;
-    }
-    .modal h2 { font-size: 1.35rem; margin-bottom: 6px; }
-    .modal .price { font-size: 2rem; font-weight: 800; letter-spacing: -.03em; margin: 12px 0 4px; }
-    .modal .price span { font-size: 1rem; font-weight: 600; color: var(--muted); }
-    .modal ul { margin: 14px 0 20px; padding-left: 1.2em; color: #344054; font-size: .92rem; }
-    .modal ul li { margin-bottom: 6px; }
-    .modal-close {
-      position: absolute; top: 12px; right: 14px; border: none; background: transparent;
-      font-size: 1.4rem; color: var(--muted); line-height: 1; padding: 4px 8px;
-    }
-    .modal-close:hover { color: var(--ink); }
-    .modal-actions { display: flex; flex-direction: column; gap: 8px; }
-    .modal-note { margin: 10px 0 0; font-size: .78rem; color: var(--muted); text-align: center; }
-
     @media (max-width: 650px) {
       .shell { width: min(100% - 22px, 920px); padding-top: 28px; }
       .card { border-radius: 17px; padding: 20px 16px; }
@@ -255,7 +203,7 @@
       .summary { grid-template-columns: 1fr; gap: 8px; }
       .summary-box { display: flex; justify-content: space-between; align-items: center; }
       .summary-box .small { margin: 0; }
-      .result, .result.pro-extra { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .result { grid-template-columns: 1fr 1fr; gap: 9px; }
       .person { grid-column: 1 / -1; padding-bottom: 2px; }
       .pay-links { grid-column: 1 / -1; }
     }
@@ -268,11 +216,10 @@
         <div>
           <div class="eyebrow">Simple, shareable math</div>
           <h1>Rent Split Link</h1>
-          <p class="intro">Split monthly rent, account for what has already been paid, and share the numbers with one link. Free = equal shares. Pro unlocks custom %, pay links, household save, and export.</p>
+          <p class="intro">Split monthly rent, account for what has already been paid, and share the numbers with one link.</p>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
           <span id="plan-badge" class="plan-badge free">Free</span>
-          <button id="upgrade-open" class="pro-btn" type="button" style="min-height:38px;padding:0 14px;font-size:.88rem;">Upgrade to Pro</button>
         </div>
       </div>
     </header>
@@ -306,11 +253,6 @@
             <span id="pct-total-warn" class="pct-total-warn">Shares must total exactly 100% before you can copy a link.</span>
           </div>
         </div>
-        <div class="pro-lock-overlay" aria-hidden="true">
-          <div class="lock-label">🔒 Custom % per roommate</div>
-          <p class="lock-sub">Pro lets you set unequal shares (e.g. 40/30/30).</p>
-          <button class="pro-btn upgrade-cta" type="button">Upgrade — $5/mo</button>
-        </div>
       </div>
 
       <div class="section-heading" style="margin-top: 27px;">
@@ -337,11 +279,6 @@
           </div>
           <p class="small" style="margin:6px 0 0;">Saved in this browser only (localStorage).</p>
         </div>
-        <div class="pro-lock-overlay">
-          <div class="lock-label">🔒 Named household save</div>
-          <p class="lock-sub">Save &amp; reload your household setup on this device.</p>
-          <button class="pro-btn upgrade-cta" type="button">Upgrade — $5/mo</button>
-        </div>
       </div>
 
       <div class="pro-panel" id="paylinks-panel">
@@ -351,11 +288,6 @@
             <span class="hint">Venmo / Cash App handles per person</span>
           </div>
           <div id="paylink-fields" class="roommates"></div>
-        </div>
-        <div class="pro-lock-overlay">
-          <div class="lock-label">🔒 Venmo &amp; Cash App pay links</div>
-          <p class="lock-sub">Add handles so each roommate gets a one-tap pay link for what they owe.</p>
-          <button class="pro-btn upgrade-cta" type="button">Upgrade — $5/mo</button>
         </div>
       </div>
     </section>
@@ -383,42 +315,11 @@
             <button id="export-text" class="secondary" type="button">Copy settlement text</button>
           </div>
         </div>
-        <div class="pro-lock-overlay">
-          <div class="lock-label">🔒 PDF / export settlements</div>
-          <p class="lock-sub">See who owes whom and export a clean print-ready summary.</p>
-          <button class="pro-btn upgrade-cta" type="button">Upgrade — $5/mo</button>
-        </div>
       </div>
-
-      <div class="watermark" id="free-watermark">Made with Rent Split Link (Free) — Upgrade to Pro to remove this watermark.</div>
     </section>
 
-    <footer>Everything stays in this link — no account or backend required for the free tier. Pro checkout uses Stripe (draft).</footer>
+    <footer>Everything stays in this link — no account or backend required.</footer>
   </main>
-
-  <!-- Upgrade modal -->
-  <div id="upgrade-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
-    <div class="modal">
-      <button type="button" class="modal-close" id="upgrade-close" aria-label="Close">&times;</button>
-      <h2 id="upgrade-title">Rent Split Link Pro</h2>
-      <p class="small">Unlock custom splits, pay links, household save, and export.</p>
-      <div class="price">$5 <span>/ month</span></div>
-      <ul>
-        <li>Custom % per roommate</li>
-        <li>Venmo &amp; Cash App pay links</li>
-        <li>Named household save (local)</li>
-        <li>PDF / export “who owes whom”</li>
-        <li>No free watermark</li>
-      </ul>
-      <div class="modal-actions">
-        <button id="stripe-checkout" class="pro-btn" type="button">Upgrade with Stripe</button>
-        <button id="upgrade-cancel" class="secondary" type="button">Not now</button>
-      </div>
-      <p class="modal-note">Draft: uses placeholder Stripe checkout URL from <code>stripe-config.js</code>. After success, return with <code>?pro=1</code>.</p>
-    </div>
-  </div>
-
-  <script src="stripe-config.js"></script>
   <script>
     (() => {
       'use strict';
@@ -435,8 +336,6 @@
       const shareModeHint = document.querySelector('#share-mode-hint');
       const shareLabel = document.querySelector('#share-label');
       const planBadge = document.querySelector('#plan-badge');
-      const upgradeOpen = document.querySelector('#upgrade-open');
-      const upgradeModal = document.querySelector('#upgrade-modal');
       const paylinkFields = document.querySelector('#paylink-fields');
       const whoOwesEl = document.querySelector('#who-owes');
       const householdNameInput = document.querySelector('#household-name');
@@ -470,14 +369,13 @@
         document.body.classList.toggle('is-custom', pro && shareMode === 'custom');
         planBadge.textContent = pro ? 'Pro' : 'Free';
         planBadge.className = 'plan-badge ' + (pro ? 'pro' : 'free');
-        upgradeOpen.style.display = pro ? 'none' : '';
         shareModeHint.textContent = pro && shareMode === 'custom' ? 'Custom %' : 'Equal shares';
         renderInputs();
         renderPaylinkFields();
         renderResults();
       }
 
-      // Honor ?pro=1 (Stripe success redirect) and ?pro=0 (dev reset)
+      // Honor ?pro=1 recovery unlock and ?pro=0 (dev reset)
       const params = new URLSearchParams(location.search);
       if (params.get('pro') === '1') {
         localStorage.setItem(PRO_KEY, 'true');
@@ -881,32 +779,9 @@
         }
       }
 
-      function openModal() {
-        upgradeModal.classList.add('open');
-      }
-      function closeModal() {
-        upgradeModal.classList.remove('open');
-      }
-
-      function stripeCheckout() {
-        const cfg = window.RSL_STRIPE || {};
-        const url = cfg.checkoutUrl || '';
-        if (!url || url.includes('PLACEHOLDER')) {
-          alert(
-            'Stripe checkout URL is still a placeholder.\n\n' +
-            '1. Copy stripe-config.example.js → stripe-config.js\n' +
-            '2. Create a Payment Link or Checkout Session (see docs/STRIPE_SETUP.md)\n' +
-            '3. Set checkoutUrl (and success URL with ?pro=1)\n\n' +
-            'Dev shortcut: append ?pro=1 to this page to unlock Pro locally.'
-          );
-          return;
-        }
-        window.location.href = url;
-      }
-
       // Household save/load
       document.querySelector('#save-household').addEventListener('click', () => {
-        if (!isPro()) { openModal(); return; }
+        if (!isPro()) return;
         const payload = {
           name: householdNameInput.value.trim() || 'Household',
           rent: rentInput.value,
@@ -917,7 +792,7 @@
         shareNoteEl.textContent = `Saved “${payload.name}” locally.`;
       });
       document.querySelector('#load-household').addEventListener('click', () => {
-        if (!isPro()) { openModal(); return; }
+        if (!isPro()) return;
         try {
           const raw = localStorage.getItem(HOUSEHOLD_KEY);
           if (!raw) { shareNoteEl.textContent = 'No saved household found.'; return; }
@@ -943,11 +818,11 @@
 
       // Export
       document.querySelector('#export-pdf').addEventListener('click', () => {
-        if (!isPro()) { openModal(); return; }
+        if (!isPro()) return;
         window.print();
       });
       document.querySelector('#export-text').addEventListener('click', async () => {
-        if (!isPro()) { openModal(); return; }
+        if (!isPro()) return;
         const rent = numberValue(rentInput.value);
         const shares = getShares(rent);
         const nets = people.map((person, index) => ({
@@ -987,7 +862,7 @@
 
       document.querySelectorAll('input[name="share-mode"]').forEach(radio => {
         radio.addEventListener('change', e => {
-          if (!isPro()) { openModal(); e.target.checked = false; document.querySelector('input[name="share-mode"][value="equal"]').checked = true; return; }
+          if (!isPro()) { e.target.checked = false; document.querySelector('input[name="share-mode"][value="equal"]').checked = true; return; }
           shareMode = e.target.value;
           document.body.classList.toggle('is-custom', isPro() && shareMode === 'custom');
           if (shareMode === 'custom') {
@@ -1024,14 +899,6 @@
         renderInputs();
         renderResults();
       });
-
-      upgradeOpen.addEventListener('click', openModal);
-      document.querySelector('#upgrade-close').addEventListener('click', closeModal);
-      document.querySelector('#upgrade-cancel').addEventListener('click', closeModal);
-      document.querySelector('#stripe-checkout').addEventListener('click', stripeCheckout);
-      upgradeModal.addEventListener('click', e => { if (e.target === upgradeModal) closeModal(); });
-      document.querySelectorAll('.upgrade-cta').forEach(btn => btn.addEventListener('click', openModal));
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
       if (!stateFromPage()) {
         people = [makePerson(), makePerson()];
