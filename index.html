@@ -82,8 +82,9 @@
     .roommate-row .field-label { margin-bottom: 0; }
     .roommate-row .field-label input { margin-top: 7px; }
     .pct-field { display: none; }
-    body.is-pro .pct-field { display: block; }
-    body.is-pro .roommate-row.equal-mode { grid-template-columns: minmax(0, 1.2fr) minmax(100px, 140px) minmax(90px, 110px) auto; }
+    body.is-pro.is-custom .pct-field { display: block; }
+    body.is-pro .roommate-row.equal-mode { grid-template-columns: minmax(0, 1fr) minmax(125px, 180px) auto; }
+    body.is-pro.is-custom .roommate-row { grid-template-columns: minmax(0, 1.2fr) minmax(100px, 140px) minmax(90px, 110px) auto; }
     body:not(.is-pro) .roommate-row { grid-template-columns: minmax(0, 1fr) minmax(125px, 180px) auto; }
     .remove {
       height: 45px;
@@ -180,6 +181,30 @@
     }
     .mode-toggle { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .mode-toggle label { display: flex; align-items: center; gap: 6px; font-size: .88rem; font-weight: 600; color: #344054; }
+    .pct-controls {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+      margin-top: 10px;
+    }
+    .pct-meter {
+      display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px;
+      font-size: .88rem; font-weight: 700;
+    }
+    .pct-meter .pct-total { color: var(--ink); }
+    .pct-meter .pct-remain { color: var(--muted); font-weight: 650; }
+    .pct-meter.is-ok .pct-remain { color: var(--positive); }
+    .pct-meter.is-over .pct-remain,
+    .pct-meter.is-under .pct-remain { color: var(--negative); }
+    .pct-meter.is-over .pct-total,
+    .pct-meter.is-under .pct-total { color: var(--negative); }
+    .pct-helper-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pct-helper-btns .secondary {
+      min-height: 36px; padding: 0 12px; font-size: .82rem; font-weight: 700;
+    }
+    .pct-dollar {
+      display: block; margin-top: 4px; color: var(--muted);
+      font-size: .76rem; font-weight: 650;
+    }
+    .share-note.is-error { color: var(--negative); }
     .pct-total-warn { color: var(--negative); font-size: .85rem; font-weight: 700; display: none; }
     .pct-total-warn.show { display: block; }
     .who-owes { display: grid; gap: 8px; margin-top: 8px; }
@@ -219,12 +244,14 @@
       .card { border-radius: 17px; padding: 20px 16px; }
       .roommate-row,
       body.is-pro .roommate-row.equal-mode,
+      body.is-pro.is-custom .roommate-row,
       body:not(.is-pro) .roommate-row {
         grid-template-columns: minmax(0, 1fr) auto;
       }
       .roommate-row .paid-field,
       .roommate-row .pct-field { grid-column: 1; }
       .roommate-row .remove { grid-column: 2; grid-row: 1 / span 3; }
+      .pct-controls { flex-direction: column; align-items: flex-start; }
       .summary { grid-template-columns: 1fr; gap: 8px; }
       .summary-box { display: flex; justify-content: space-between; align-items: center; }
       .summary-box .small { margin: 0; }
@@ -266,7 +293,17 @@
             <span class="field-label" style="margin:0;">Share mode <span class="pro-tag">Pro</span></span>
             <label><input type="radio" name="share-mode" value="equal" checked> Equal</label>
             <label><input type="radio" name="share-mode" value="custom"> Custom %</label>
-            <span id="pct-total-warn" class="pct-total-warn">Percentages should add up to 100%.</span>
+          </div>
+          <div id="pct-custom-tools" class="pct-controls" hidden>
+            <div id="pct-meter" class="pct-meter" aria-live="polite">
+              <span class="pct-total">Total: 0%</span>
+              <span class="pct-remain">100% remaining</span>
+            </div>
+            <div class="pct-helper-btns">
+              <button id="pct-equal-reset" class="secondary" type="button" title="Set every roommate to an equal share totaling 100%">Equal reset</button>
+              <button id="pct-distribute" class="secondary" type="button" title="Split whatever is left so the total reaches 100%">Distribute remainder</button>
+            </div>
+            <span id="pct-total-warn" class="pct-total-warn">Shares must total exactly 100% before you can copy a link.</span>
           </div>
         </div>
         <div class="pro-lock-overlay" aria-hidden="true">
@@ -404,6 +441,8 @@
       const whoOwesEl = document.querySelector('#who-owes');
       const householdNameInput = document.querySelector('#household-name');
       const pctWarn = document.querySelector('#pct-total-warn');
+      const pctCustomTools = document.querySelector('#pct-custom-tools');
+      const pctMeter = document.querySelector('#pct-meter');
       const currency = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
 
       let people = [];
@@ -421,17 +460,18 @@
 
       function applyProUi() {
         const pro = isPro();
-        document.body.classList.toggle('is-pro', pro);
-        planBadge.textContent = pro ? 'Pro' : 'Free';
-        planBadge.className = 'plan-badge ' + (pro ? 'pro' : 'free');
-        upgradeOpen.style.display = pro ? 'none' : '';
-        shareModeHint.textContent = pro && shareMode === 'custom' ? 'Custom %' : 'Equal shares';
         if (!pro) {
           shareMode = 'equal';
           document.querySelectorAll('input[name="share-mode"]').forEach(r => {
             r.checked = r.value === 'equal';
           });
         }
+        document.body.classList.toggle('is-pro', pro);
+        document.body.classList.toggle('is-custom', pro && shareMode === 'custom');
+        planBadge.textContent = pro ? 'Pro' : 'Free';
+        planBadge.className = 'plan-badge ' + (pro ? 'pro' : 'free');
+        upgradeOpen.style.display = pro ? 'none' : '';
+        shareModeHint.textContent = pro && shareMode === 'custom' ? 'Custom %' : 'Equal shares';
         renderInputs();
         renderPaylinkFields();
         renderResults();
@@ -480,19 +520,127 @@
           const equal = rent / n;
           return people.map(() => equal);
         }
-        const pcts = people.map(p => numberValue(p.pct));
-        const sum = pcts.reduce((a, b) => a + b, 0);
-        if (sum <= 0) return people.map(() => rent / n);
-        return pcts.map(p => rent * (p / 100));
+        // Dollar share = rent × (pct / 100). Live even when total ≠ 100%.
+        return people.map(p => rent * (numberValue(p.pct) / 100));
+      }
+
+      function pctSum() {
+        return people.reduce((s, p) => s + numberValue(p.pct), 0);
+      }
+
+      function pctsValid() {
+        return people.length > 0 && Math.abs(pctSum() - 100) <= 0.05;
+      }
+
+      function usingCustom() {
+        return isPro() && shareMode === 'custom';
+      }
+
+      /** Equal percentages that sum to exactly 100 (2-decimal precision). */
+      function equalPctValues(n) {
+        if (n <= 0) return [];
+        const raw = 100 / n;
+        const floors = Array.from({ length: n }, (_, i) =>
+          i < n - 1 ? Math.floor(raw * 100) / 100 : 0
+        );
+        const allocated = floors.slice(0, -1).reduce((a, b) => a + b, 0);
+        floors[n - 1] = Math.round((100 - allocated) * 100) / 100;
+        return floors;
+      }
+
+      function formatPct(value) {
+        const n = Math.round(value * 100) / 100;
+        return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.?0+$/, '');
+      }
+
+      function setEqualPcts() {
+        const values = equalPctValues(people.length);
+        people.forEach((p, i) => { p.pct = String(values[i]); });
+      }
+
+      /** Add leftover (100 − sum) across roommates so total becomes 100%. */
+      function distributeRemainder() {
+        const n = people.length;
+        if (!n) return;
+        const sum = pctSum();
+        const leftover = Math.round((100 - sum) * 100) / 100;
+        if (Math.abs(leftover) < 0.005) return;
+        // Prefer filling blank/zero rows first when under total.
+        if (leftover > 0) {
+          const emptyIdx = people
+            .map((p, i) => ({ i, v: numberValue(p.pct), blank: p.pct === '' || numberValue(p.pct) === 0 }))
+            .filter(x => x.blank)
+            .map(x => x.i);
+          const targets = emptyIdx.length ? emptyIdx : people.map((_, i) => i);
+          const t = targets.length;
+          const pieces = equalPctValues(t).map(v => Math.round((v / 100) * leftover * 100) / 100);
+          // Recompute last piece to absorb rounding so leftover is fully used
+          const used = pieces.slice(0, -1).reduce((a, b) => a + b, 0);
+          pieces[t - 1] = Math.round((leftover - used) * 100) / 100;
+          targets.forEach((idx, k) => {
+            const next = Math.round((numberValue(people[idx].pct) + pieces[k]) * 100) / 100;
+            people[idx].pct = String(next);
+          });
+        } else {
+          // Over: scale all non-zero down proportionally to land on 100.
+          const over = -leftover;
+          const nonzero = people
+            .map((p, i) => ({ i, v: numberValue(p.pct) }))
+            .filter(x => x.v > 0);
+          if (!nonzero.length) return;
+          let remainingCut = over;
+          nonzero.forEach((x, k) => {
+            if (k === nonzero.length - 1) {
+              const next = Math.round((numberValue(people[x.i].pct) - remainingCut) * 100) / 100;
+              people[x.i].pct = String(Math.max(0, next));
+            } else {
+              const cut = Math.round((x.v / sum) * over * 100) / 100;
+              remainingCut = Math.round((remainingCut - cut) * 100) / 100;
+              const next = Math.round((x.v - cut) * 100) / 100;
+              people[x.i].pct = String(Math.max(0, next));
+            }
+          });
+        }
+      }
+
+      function updatePctMeter() {
+        const custom = usingCustom();
+        pctCustomTools.hidden = !custom;
+        if (!custom) {
+          pctWarn.classList.remove('show');
+          return;
+        }
+        const sum = Math.round(pctSum() * 100) / 100;
+        const remain = Math.round((100 - sum) * 100) / 100;
+        const totalEl = pctMeter.querySelector('.pct-total');
+        const remainEl = pctMeter.querySelector('.pct-remain');
+        totalEl.textContent = `Total: ${formatPct(sum)}%`;
+        pctMeter.classList.remove('is-ok', 'is-over', 'is-under');
+        if (Math.abs(remain) <= 0.05) {
+          pctMeter.classList.add('is-ok');
+          remainEl.textContent = '✓ Adds up to 100%';
+          pctWarn.classList.remove('show');
+        } else if (remain > 0) {
+          pctMeter.classList.add('is-under');
+          remainEl.textContent = `${formatPct(remain)}% remaining`;
+          pctWarn.classList.add('show');
+        } else {
+          pctMeter.classList.add('is-over');
+          remainEl.textContent = `${formatPct(-remain)}% over`;
+          pctWarn.classList.add('show');
+        }
       }
 
       function renderInputs() {
-        const pro = isPro();
-        const useCustom = pro && shareMode === 'custom';
+        const useCustom = usingCustom();
+        const rent = numberValue(rentInput.value);
         roommatesEl.innerHTML = '';
         people.forEach((person, index) => {
           const row = document.createElement('div');
           row.className = 'roommate-row' + (useCustom ? '' : ' equal-mode');
+          const dollarHint = useCustom
+            ? `<span class="pct-dollar">${money(rent * (numberValue(person.pct) / 100))}</span>`
+            : '';
           row.innerHTML = `
             <label class="field-label">Name
               <input class="name-input" type="text" maxlength="80" autocomplete="off" placeholder="Roommate ${index + 1}" value="">
@@ -502,6 +650,7 @@
             </label>
             <label class="field-label pct-field">Share %
               <input class="pct-input" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" value="">
+              ${dollarHint}
             </label>
             <button class="remove" type="button" aria-label="Remove roommate">Remove</button>`;
           const nameInput = row.querySelector('.name-input');
@@ -516,7 +665,12 @@
             renderResults();
           });
           paidInput.addEventListener('input', event => { people[index].paid = event.target.value; renderResults(); });
-          pctInput.addEventListener('input', event => { people[index].pct = event.target.value; renderResults(); });
+          pctInput.addEventListener('input', event => {
+            people[index].pct = event.target.value;
+            const tip = row.querySelector('.pct-dollar');
+            if (tip) tip.textContent = money(numberValue(rentInput.value) * (numberValue(people[index].pct) / 100));
+            renderResults();
+          });
           row.querySelector('.remove').addEventListener('click', () => {
             people.splice(index, 1);
             if (!people.length) people.push(makePerson());
@@ -526,6 +680,7 @@
           });
           roommatesEl.appendChild(row);
         });
+        updatePctMeter();
       }
 
       function renderPaylinkFields() {
@@ -582,15 +737,18 @@
         const paidTotal = people.reduce((sum, person) => sum + numberValue(person.paid), 0);
         const balance = rent - paidTotal;
         const equalShare = people.length ? rent / people.length : 0;
-        const useCustom = isPro() && shareMode === 'custom';
+        const useCustom = usingCustom();
 
+        updatePctMeter();
+        // Keep per-row $ hints in sync when rent changes without a full re-render of inputs
         if (useCustom) {
-          const pctSum = people.reduce((s, p) => s + numberValue(p.pct), 0);
-          pctWarn.classList.toggle('show', people.length > 0 && Math.abs(pctSum - 100) > 0.05);
+          roommatesEl.querySelectorAll('.roommate-row').forEach((row, index) => {
+            const tip = row.querySelector('.pct-dollar');
+            if (tip) tip.textContent = money(rent * (numberValue(people[index].pct) / 100));
+          });
           shareLabel.textContent = 'Custom shares';
           shareTotalEl.textContent = money(rent);
         } else {
-          pctWarn.classList.remove('show');
           shareLabel.textContent = 'Each share';
           shareTotalEl.textContent = money(equalShare);
         }
@@ -695,6 +853,19 @@
       }
 
       async function copyShareLink() {
+        shareNoteEl.classList.remove('is-error');
+        if (usingCustom() && !pctsValid()) {
+          const sum = Math.round(pctSum() * 100) / 100;
+          const remain = Math.round((100 - sum) * 100) / 100;
+          const detail = remain > 0
+            ? `They currently add up to ${formatPct(sum)}% (${formatPct(remain)}% still remaining).`
+            : `They currently add up to ${formatPct(sum)}% (${formatPct(-remain)}% over).`;
+          shareNoteEl.classList.add('is-error');
+          shareNoteEl.textContent =
+            `Can't copy yet — custom shares must total 100%. ${detail} Use Equal reset or Distribute remainder to fix it.`;
+          updatePctMeter();
+          return;
+        }
         const url = `${location.href.split('#')[0].split('?')[0]}${location.search}${stateHash()}`;
         try {
           await navigator.clipboard.writeText(url);
@@ -759,6 +930,8 @@
           });
           people = (data.people || []).map(p => makePerson(p.name, p.paid, p.pct, p.venmo, p.cashapp));
           if (!people.length) people.push(makePerson());
+          document.body.classList.toggle('is-custom', isPro() && shareMode === 'custom');
+          shareNoteEl.classList.remove('is-error');
           renderInputs();
           renderPaylinkFields();
           renderResults();
@@ -798,6 +971,7 @@
 
       document.querySelector('#add-person').addEventListener('click', () => {
         people.push(makePerson());
+        shareNoteEl.classList.remove('is-error');
         renderInputs();
         renderPaylinkFields();
         renderResults();
@@ -815,9 +989,40 @@
         radio.addEventListener('change', e => {
           if (!isPro()) { openModal(); e.target.checked = false; document.querySelector('input[name="share-mode"][value="equal"]').checked = true; return; }
           shareMode = e.target.value;
+          document.body.classList.toggle('is-custom', isPro() && shareMode === 'custom');
+          if (shareMode === 'custom') {
+            const allEmpty = people.every(p => p.pct === '' || p.pct == null);
+            if (allEmpty) setEqualPcts();
+          }
+          shareNoteEl.classList.remove('is-error');
+          shareNoteEl.textContent = '';
           renderInputs();
           renderResults();
         });
+      });
+
+      document.querySelector('#pct-equal-reset').addEventListener('click', () => {
+        if (!usingCustom()) return;
+        setEqualPcts();
+        shareNoteEl.classList.remove('is-error');
+        shareNoteEl.textContent = 'Shares reset to equal percentages.';
+        renderInputs();
+        renderResults();
+      });
+      document.querySelector('#pct-distribute').addEventListener('click', () => {
+        if (!usingCustom()) return;
+        const before = pctSum();
+        distributeRemainder();
+        shareNoteEl.classList.remove('is-error');
+        if (Math.abs(before - 100) <= 0.05) {
+          shareNoteEl.textContent = 'Already at 100% — nothing to distribute.';
+        } else {
+          shareNoteEl.textContent = pctsValid()
+            ? 'Remainder distributed — shares now total 100%.'
+            : 'Adjusted shares toward 100%.';
+        }
+        renderInputs();
+        renderResults();
       });
 
       upgradeOpen.addEventListener('click', openModal);
